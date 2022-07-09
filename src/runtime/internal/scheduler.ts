@@ -1,4 +1,4 @@
-import { run_all } from './utils';
+import { handle_on_error, run_all } from './utils';
 import { current_component, set_current_component } from './lifecycle';
 
 export const dirty_components = [];
@@ -108,12 +108,6 @@ function update($$) {
 			$$.after_update.forEach(add_render_callback);
 		}
 	} catch (e) {
-		if ($$.on_error.length > 0) {
-			$$.on_error.forEach((fn) => {
-				fn(e);
-			});
-		} else {
-			throw e;
-		}
+		handle_on_error($$.on_error, e);
 	}
 }

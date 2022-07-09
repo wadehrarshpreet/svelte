@@ -187,3 +187,13 @@ export const has_prop = (obj, prop) => Object.prototype.hasOwnProperty.call(obj,
 export function action_destroyer(action_result) {
 	return action_result && is_function(action_result.destroy) ? action_result.destroy : noop;
 }
+
+export function handle_on_error(fns: Function[], error: Error) {
+	if (fns.length > 0) {
+		fns.forEach((fn) => {
+			fn(error);
+		});
+	} else {
+		throw error;
+	}
+}

@@ -1,6 +1,6 @@
 import { add_render_callback, flush, schedule_update, dirty_components } from './scheduler';
 import { current_component, set_current_component } from './lifecycle';
-import { blank_object, is_empty, is_function, run, run_all, noop } from './utils';
+import { blank_object, is_empty, is_function, run, run_all, noop, handle_on_error } from './utils';
 import { children, detach, start_hydrating, end_hydrating } from './dom';
 import { transition_in } from './transitions';
 
@@ -142,11 +142,16 @@ export function init(component, options, instance, create_fragment, not_equal, p
 	$$.ctx = instance
 		? instance(component, options.props || {}, (i, ret, ...rest) => {
 			const value = rest.length ? rest[0] : ret;
-			if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
-				if (!$$.skip_bound && $$.bound[i]) $$.bound[i](value);
-				if (ready) make_dirty(component, i);
+			try {
+				if ($$.ctx && not_equal($$.ctx[i], ($$.ctx[i] = value))) {
+					if (!$$.skip_bound && $$.bound[i]) $$.bound[i](value);
+					if (ready) make_dirty(component, i);
+				}
+				return ret;
+			} catch (e) {
+				// handle error
+				handle_on_error($$.on_error, e);
 			}
-			return ret;
 		})
 		: [];
 
@@ -159,13 +164,7 @@ export function init(component, options, instance, create_fragment, not_equal, p
 		$$.fragment = create_fragment ? create_fragment($$.ctx) : false;
 	} catch (e) {
 		// handle mount error
-		if ($$.on_error.length > 0) {
-			$$.on_error.forEach((fn) => {
-				fn(e);
-			});
-		} else {
-			throw e;
-		}
+		handle_on_error($$.on_error, e);
 	}
 
 	if (options.target) {
