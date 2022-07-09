@@ -35,6 +35,7 @@ interface T$$ {
 	before_update: any[];
 	context: Map<any, any>;
 	on_mount: any[];
+	on_error: any[];
 	on_destroy: any[];
 	skip_bound: boolean;
 	on_disconnect: any[];
@@ -122,6 +123,7 @@ export function init(component, options, instance, create_fragment, not_equal, p
 		on_mount: [],
 		on_destroy: [],
 		on_disconnect: [],
+		on_error: [],
 		before_update: [],
 		after_update: [],
 		context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
@@ -153,7 +155,18 @@ export function init(component, options, instance, create_fragment, not_equal, p
 	run_all($$.before_update);
 
 	// `false` as a special case of no DOM component
-	$$.fragment = create_fragment ? create_fragment($$.ctx) : false;
+	try {
+		$$.fragment = create_fragment ? create_fragment($$.ctx) : false;
+	} catch (e) {
+		// handle mount error
+		if ($$.on_error.length > 0) {
+			$$.on_error.forEach((fn) => {
+				fn(e);
+			});
+		} else {
+			throw e;
+		}
+	}
 
 	if (options.target) {
 		if (options.hydrate) {

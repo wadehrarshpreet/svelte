@@ -19,6 +19,10 @@ export function onMount(fn: () => any) {
 	get_current_component().$$.on_mount.push(fn);
 }
 
+export function onError(fn: () => any) {
+	get_current_component().$$.on_error.push(fn);
+}
+
 export function afterUpdate(fn: () => any) {
 	get_current_component().$$.after_update.push(fn);
 }

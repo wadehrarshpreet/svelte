@@ -5,6 +5,7 @@ export {
 	onDestroy,
 	beforeUpdate,
 	afterUpdate,
+	onError,
 	setContext,
 	getContext,
 	getAllContexts,

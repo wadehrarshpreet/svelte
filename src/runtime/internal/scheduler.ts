@@ -97,13 +97,23 @@ export function flush() {
 }
 
 function update($$) {
-	if ($$.fragment !== null) {
-		$$.update();
-		run_all($$.before_update);
-		const dirty = $$.dirty;
-		$$.dirty = [-1];
-		$$.fragment && $$.fragment.p($$.ctx, dirty);
+	try {
+		if ($$.fragment !== null) {
+			$$.update();
+			run_all($$.before_update);
+			const dirty = $$.dirty;
+			$$.dirty = [-1];
+			$$.fragment && $$.fragment.p($$.ctx, dirty);
 
-		$$.after_update.forEach(add_render_callback);
+			$$.after_update.forEach(add_render_callback);
+		}
+	} catch (e) {
+		if ($$.on_error.length > 0) {
+			$$.on_error.forEach((fn) => {
+				fn(e);
+			});
+		} else {
+			throw e;
+		}
 	}
 }
