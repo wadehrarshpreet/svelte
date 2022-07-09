@@ -90,7 +90,7 @@
     "test:unit": "mocha --require sucrase/register --recursive src/**/__test__.ts --exit",
     "quicktest": "mocha",
     "build": "rollup -c && npm run tsd",
-    "prepare": "npm run build",
+    "prepare": "PUBLISH=true npm run build",
     "dev": "rollup -cw",
     "pretest": "npm run build",
     "posttest": "agadoo internal/index.mjs",
